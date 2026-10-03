@@ -3,42 +3,65 @@ import json
 from google import genai
 from google.genai import types
 
-def generate_scene_script(prompt: str, target_scenes: int = 2) -> list[dict]:
-    """
-    Parses user prompt into an EpNova-style multi-shot drama script.
-    Maintains character visual anchors and scene context across shots.
-    """
-    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+def generate_script(prompt: str) -> dict:
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY environment variable not set.")
 
-    system_instruction = f"""
-    You are the EpNova Drama & Script Engine for WhyzeD Studio.
-    Convert user prompts into a structured multi-shot drama script breakdown with exactly {target_scenes} scenes.
-    
-    Ensure visual continuity, multi-shot pacing, and specific prompt modifiers for post-editing.
-    Output MUST be valid raw JSON array matching this format:
-    [
-      {{
-        "scene_id": 1,
-        "visual_prompt": "Shot 1: Close-up description...",
-        "prompt_edit_modifier": "Post-processing overlay instructions...",
-        "narration_text": "Spoken dialogue or narration line.",
-        "estimated_seconds": 5.0
-      }}
-    ]
-    Do NOT wrap in markdown fences. Return ONLY raw JSON.
-    """
+    client = genai.Client(api_key=api_key)
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=system_instruction,
-            temperature=0.7,
-        )
+    system_instruction = (
+        "You are WhyzeD Studio Engine. Generate a short-form vertical video script (9:16) "
+        "structured as valid JSON matching this schema:\n"
+        "{\n"
+        '  "topic": "string",\n'
+        '  "scenes": [\n'
+        "    {\n"
+        '      "scene_id": 1,\n'
+        '      "narration": "string",\n'
+        '      "visual_prompt": "string",\n'
+        '      "duration_seconds": 5\n'
+        "    }\n"
+        "  ]\n"
+        "}\n"
+        "Do not include markdown backticks or extra commentary, return ONLY the raw JSON object."
     )
 
-    clean_json = response.text.strip().removeprefix("```json").removesuffix("```").strip()
-    return json.loads(clean_json)
+    primary_model = "gemini-3.8-flash"
+
+    try:
+        response = client.models.generate_content(
+            model=primary_model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=0.7,
+                response_mime_type="application/json"
+            )
+        )
+        
+        script_data = json.loads(response.text)
+        print(f"[Script Engine] Script generated successfully for topic: '{prompt}'")
+        return script_data
+
+    except Exception as e:
+        print(f"[Script Engine] Primary model ({primary_model}) failed: {e}")
+        fallback_model = "gemini-3.5-flash-lite"
+        try:
+            print(f"[Script Engine] Retrying with fallback model '{fallback_model}'...")
+            response = client.models.generate_content(
+                model=fallback_model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    temperature=0.7,
+                    response_mime_type="application/json"
+                )
+            )
+            return json.loads(response.text)
+        except Exception as fallback_err:
+            raise RuntimeError(f"Script generation failed on all attempts: {fallback_err}")
 
 if __name__ == "__main__":
-    print("[Script Engine] Module Ready.")
+    test_script = generate_script("Ijaw River Flowing")
+    print(json.dumps(test_script, indent=2))
