@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+workspace/*.wav
+workspace/*.mp4
+workspace/*.ass
+workspace/concat_list.txt
+.DS_Store
