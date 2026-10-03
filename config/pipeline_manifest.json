@@ -1,0 +1,51 @@
+{
+  "project_meta": {
+    "app_name": "WhyzeD Studio",
+    "version": "1.0.0",
+    "aspect_ratio": "9:16",
+    "resolution": {
+      "width": 1080,
+      "height": 1920
+    },
+    "fps": 30,
+    "brand_color": "#00F0FF",
+    "watermark": {
+      "text": "WHYZED STUDIO",
+      "position": "bottom-left",
+      "opacity": 0.7
+    }
+  },
+  "voice_config": {
+    "engine_mode": "custom_clone",
+    "reference_wav": "assets/voices/my_voice_sample.wav",
+    "language": "en"
+  },
+  "character_anchor": {
+    "character_id": "char_victor_envoy",
+    "name": "Global Envoy",
+    "base_prompt": "Young African tech innovator in a dark hoodie with cyan rim lighting, cinematic 4k, photorealistic face anchor",
+    "reference_image": "assets/characters/envoy_master.png"
+  },
+  "scenes": [
+    {
+      "scene_id": 1,
+      "visual_prompt": "Shot 1: Close-up of character in dark studio looking at holographic glowing cyan UI elements, high contrast",
+      "prompt_edit_modifier": "Add subtle electric blue light flare sweeping from right",
+      "narration_text": "Welcome to WhyzeD Studio. Automated short drama and video generation powered completely on device.",
+      "estimated_seconds": 5.0,
+      "actual_duration_sec": 5.0,
+      "audio_file": "workspace/scene_1_voice.wav",
+      "video_file": "workspace/scene_1_raw.mp4"
+    },
+    {
+      "scene_id": 2,
+      "visual_prompt": "Shot 2: Medium shot of character standing before a futuristic server array illuminated in cyan blue",
+      "prompt_edit_modifier": "Enhance neon rim light along jacket edges",
+      "narration_text": "Zero subscription costs, multi-shot character consistency, and your custom cloned voice.",
+      "estimated_seconds": 5.5,
+      "actual_duration_sec": 5.5,
+      "audio_file": "workspace/scene_2_voice.wav",
+      "video_file": "workspace/scene_2_raw.mp4"
+    }
+  ]
+}
