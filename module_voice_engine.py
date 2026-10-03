@@ -1,18 +1,25 @@
 import os
+import subprocess
 
 class CustomVoiceEngine:
     def __init__(self, reference_wav_path: str = "assets/voices/my_voice_sample.wav"):
         self.reference_wav = reference_wav_path
         print("[Voice Engine] Custom Audio Engine Initialized.")
 
-    def synthesize_scene_voice(self, text: str, output_wav_path: str) -> str:
+    def synthesize_scene_voice(self, text: str, output_wav_path: str, duration_sec: float = 5.0) -> str:
         os.makedirs(os.path.dirname(output_wav_path), exist_ok=True)
-        print(f"[Voice Engine] Synthesizing speech: '{text[:35]}...'")
+        print(f"[Voice Engine] Synthesizing speech placeholder ({duration_sec}s): '{text[:35]}...'")
         
-        # Generates a valid placeholder WAV audio header
-        with open(output_wav_path, "wb") as f:
-            f.write(b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x44\xac\x00\x00\x88\x58\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00")
-            
+        # Generate valid PCM WAV audio of exact duration using FFmpeg lavfi
+        cmd = [
+            "ffmpeg", "-y",
+            "-f", "lavfi",
+            "-i", f"anullsrc=r=44100:cl=mono",
+            "-t", str(duration_sec),
+            "-c:a", "pcm_s16le",
+            output_wav_path
+        ]
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return output_wav_path
 
 if __name__ == "__main__":
